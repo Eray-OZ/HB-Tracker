@@ -1,4 +1,5 @@
 ﻿using HBTracker.Data.Context;
+using HBTracker.Worker.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,26 +21,15 @@ if (string.IsNullOrEmpty(connectionString))
 builder.Services.AddDbContext<HBTrackerDbContext>(options => 
 options.UseNpgsql(connectionString));
 
+builder.Services.AddScoped<PriceCheckJob>();
 
 using IHost app = builder.Build();
 
 
 using IServiceScope scope = app.Services.CreateScope();
 
-var dbContext =
-    scope.ServiceProvider.GetRequiredService<HBTrackerDbContext>();
 
-try
-{
-    bool canConnect = await dbContext.Database.CanConnectAsync();
+PriceCheckJob priceCheckJob =
+    scope.ServiceProvider.GetRequiredService<PriceCheckJob>();
 
-    Console.WriteLine(
-        canConnect
-            ? "Database connection successful."
-            : "Database connection failed.");
-}
-catch (Exception exception)
-{
-    Console.WriteLine("Database connection failed.");
-    Console.WriteLine(exception.Message);
-}
+await priceCheckJob.RunAsync();
