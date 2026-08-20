@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="HBTracker.Data/HBTracker.Data.csproj" />
+  <Project Path="HBTracker.Web/HBTracker.Web.csproj" />
+  <Project Path="HBTracker.Worker/HBTracker.Worker.csproj" />
+</Solution>
