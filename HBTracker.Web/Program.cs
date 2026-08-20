@@ -1,7 +1,22 @@
+using HBTracker.Data.Context;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new ArgumentException("Connection String Cannot Be Null");
+}
+builder.Services.AddDbContext<HBTrackerDbContext>(options => 
+options.UseNpgsql(connectionString));
+
+
+
 
 var app = builder.Build();
 
