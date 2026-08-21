@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HBTracker.Data\HBTracker.Data.csproj" />
+    <ProjectReference Include="..\HBTracker.Scraping\HBTracker.Scraping.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

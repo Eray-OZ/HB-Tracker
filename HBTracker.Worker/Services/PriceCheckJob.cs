@@ -1,5 +1,7 @@
-﻿using HBTracker.Data.Context;
+﻿using System.Runtime.InteropServices;
+using HBTracker.Data.Context;
 using HBTracker.Data.Entities;
+using HBTracker.Scraping.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -10,10 +12,12 @@ public class PriceCheckJob
 
     private readonly HBTrackerDbContext _context;
     private readonly ILogger<PriceCheckJob> _logger;
-    public PriceCheckJob(HBTrackerDbContext context, ILogger<PriceCheckJob> logger)
+    private readonly HBScraper _scraper;
+    public PriceCheckJob(HBTrackerDbContext context, ILogger<PriceCheckJob> logger, HBScraper scraper)
     {
         _context = context;
         _logger = logger;
+        _scraper = scraper;
     }
 
 
@@ -35,6 +39,10 @@ public class PriceCheckJob
                 product.SellerName ?? "Unknown",
                 product.Url);
         }
+
+
+        var content = await _scraper.GetPageTitleAsync("https://www.hepsiburada.com/apple-iphone-15-128-gb-mavi-p-HBCV00004X9ZCK");
+        Console.WriteLine(content);
     }
 
 

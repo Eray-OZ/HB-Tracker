@@ -1,4 +1,5 @@
 ﻿using HBTracker.Data.Context;
+using HBTracker.Scraping.Services;
 using HBTracker.Worker.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +23,7 @@ builder.Services.AddDbContext<HBTrackerDbContext>(options =>
 options.UseNpgsql(connectionString));
 
 builder.Services.AddScoped<PriceCheckJob>();
+builder.Services.AddScoped<HBScraper>();
 
 using IHost app = builder.Build();
 
