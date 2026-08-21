@@ -1,10 +1,11 @@
-﻿using Microsoft.Playwright;
+﻿using HBTracker.Scraping.Models;
+using Microsoft.Playwright;
 
 namespace HBTracker.Scraping.Services;
 
 public class HBScraper
 {
-    public async Task<string> GetPageTitleAsync(string url)
+    public async Task<ScrapedProduct> ScrapeProductAsync(string url)
     {
         using IPlaywright playwright =
             await Playwright.CreateAsync();
@@ -41,20 +42,28 @@ public class HBScraper
 
 
         ILocator productHeading = page.Locator("h1").First;
-
         await productHeading.WaitForAsync(
             new LocatorWaitForOptions
             {
                 State = WaitForSelectorState.Visible,
                 Timeout = 10000
             });
+        var name = await productHeading.InnerTextAsync();
 
-        var productPrice = page.Locator("div[data-test-id='default-price']");
+        ILocator productPrice = page.Locator("div[data-test-id='default-price']");
         await productPrice.WaitForAsync(new LocatorWaitForOptions { Timeout = 10000 });
+        var priceString = await productPrice.InnerTextAsync();
+        string cleanPrice = priceString.Replace("TL", "").Trim();
+        var turkishCulture = new System.Globalization.CultureInfo("tr-TR");
+        decimal priceDecimal = decimal.Parse(cleanPrice, turkishCulture);
 
 
-        return await productPrice.InnerTextAsync();
-
+        return new ScrapedProduct
+        {
+            ProductName = name,
+            Price = priceDecimal,
+            Url = url
+        };
 
     }
 }
