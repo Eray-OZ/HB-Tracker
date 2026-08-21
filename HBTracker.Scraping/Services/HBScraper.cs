@@ -31,6 +31,8 @@ public class HBScraper
         });
 
 
+
+
         IPage page = await context.NewPageAsync();
 
         await page.GotoAsync(
@@ -41,7 +43,11 @@ public class HBScraper
             });
 
 
+
+
+
         ILocator productHeading = page.Locator("h1").First;
+
         await productHeading.WaitForAsync(
             new LocatorWaitForOptions
             {
@@ -51,12 +57,18 @@ public class HBScraper
         var name = await productHeading.InnerTextAsync();
 
 
+
+
+
         ILocator productPrice = page.Locator("div[data-test-id='price']");
+
         await productPrice.WaitForAsync(new LocatorWaitForOptions { Timeout = 10000 });
         var priceString = await productPrice.InnerTextAsync();
         string cleanPrice = priceString.Replace("TL", "").Trim();
         var turkishCulture = new System.Globalization.CultureInfo("tr-TR");
         decimal priceDecimal = decimal.Parse(cleanPrice, turkishCulture);
+
+
 
 
         return new ScrapedProduct

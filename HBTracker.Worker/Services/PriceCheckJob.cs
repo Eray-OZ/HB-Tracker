@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using HBTracker.Data.Context;
+﻿using HBTracker.Data.Context;
 using HBTracker.Data.Entities;
 using HBTracker.Scraping.Models;
 using HBTracker.Scraping.Services;
@@ -34,7 +33,7 @@ public class PriceCheckJob
 
         foreach (TrackedProduct product in products)
         {
-            await CheckAndRecordPriceDropAsync(product);
+            await CheckAndRecordPriceChangeAsync(product);
         }
 
 
@@ -48,32 +47,66 @@ public class PriceCheckJob
         CancellationToken cancellationToken = default;
         var products = _context.TrackedProducts
         .Where(p => p.IsActive)
-        .AsNoTracking()
         .ToListAsync(cancellationToken);
         return products;
     }
 
 
-    private async Task CheckAndRecordPriceDropAsync(TrackedProduct product)
+    private async Task CheckAndRecordPriceChangeAsync(TrackedProduct product)
     {
-        ScrapedProduct scrapedProduct = await _scraper.ScrapeProductAsync(product.Url);
 
-        if (scrapedProduct.Price < product.CurrentPrice)
+        try { ScrapedProduct scrapedProduct = await _scraper.ScrapeProductAsync(product.Url); }
+
+        catch (TimeoutException ex)
+        {
+            _logger.LogWarning(
+                ex,
+                "Scraping timed out for {ProductName}. Skipping this product.",
+                product.ProductName);
+
+            return;
+        }
+        catch (PlaywrightException ex)
+        {
+            _logger.LogWarning(
+                ex,
+                "Playwright failed for {ProductName}. Skipping this product.",
+                product.ProductName);
+
+            return;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Unexpected scraping error for {ProductName}. Skipping this product.",
+                product.ProductName);
+
+            return;
+        }
+
+        DateTime t = DateTime.UtcNow;
+
+        if (scrapedProduct.Price != product.CurrentPrice)
         {
             await _context.PriceHistories.AddAsync(
                 new PriceHistory
                 {
                     TrackedProductId = product.Id,
                     Price = scrapedProduct.Price,
-                    CheckedAt = DateTime.Now
+                    CheckedAt = t
                 }
             );
-            await _context.SaveChangesAsync();
+            product.CurrentPrice = scrapedProduct.Price;
+            product.LastCheckedAt = t;
         }
         else
         {
-            _logger.LogInformation("{ProductName} price not dropped.", product.ProductName);
+            product.LastCheckedAt = t;
+            _logger.LogInformation("{ProductName} price unchanged.", product.ProductName);
         }
+        await _context.SaveChangesAsync();
+
     }
 
 
