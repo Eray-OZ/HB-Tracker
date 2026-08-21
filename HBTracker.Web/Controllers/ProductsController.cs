@@ -48,8 +48,8 @@ public class ProductsController : Controller
         ScrapedProduct scrapedProduct;
         try { scrapedProduct = await _scraper.ScrapeProductAsync(productUrl.Url); }
 
-        catch 
-        {    
+        catch
+        {
             return View(productUrl);
         }
 
@@ -63,8 +63,25 @@ public class ProductsController : Controller
         });
 
         await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Add));
+        return RedirectToAction(nameof(Index));
     }
+
+
+    [HttpPost]
+    public async Task<IActionResult> DisableTracking(int Id)
+    {
+        TrackedProduct? trackedProduct = await _context.TrackedProducts.FindAsync(Id);
+
+        if (trackedProduct is null)
+        {
+            return NotFound();
+        }
+
+        trackedProduct.IsActive = false;
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
 
 
 }

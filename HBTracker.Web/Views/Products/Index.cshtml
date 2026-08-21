@@ -22,21 +22,57 @@ else
                 <th>Current Price</th>
                 <th>Product URL</th>
                 <th>Active</th>
+                <th>Actions</th>
             </tr>
         </thead>
+
         <tbody>
             @foreach (var product in Model)
             {
                 <tr>
                     <td>@product.ProductName</td>
-                    <td>@(product.SellerName ?? "Unknown")</td>
-                    <td>@product.CurrentPrice.ToString("N2") TL</td>
+
                     <td>
-                        <a href="@product.Url" target="_blank">
+                        @(product.SellerName ?? "Unknown")
+                    </td>
+
+                    <td>
+                        @product.CurrentPrice.ToString("N2") TL
+                    </td>
+
+                    <td>
+                        <a href="@product.Url"
+                           target="_blank"
+                           rel="noopener noreferrer">
                             Open Product
                         </a>
                     </td>
-                    <td>@(product.IsActive ? "Yes" : "No")</td>
+
+                    <td>
+                        @(product.IsActive ? "Yes" : "No")
+                    </td>
+
+                    <td>
+                        @if (product.IsActive)
+                        {
+                            <form asp-controller="Products"
+                                  asp-action="DisableTracking"
+                                  method="post">
+
+                                <input type="hidden"
+                                       name="id"
+                                       value="@product.Id" />
+
+                                <button type="submit">
+                                    Disable Tracking
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span>Disabled</span>
+                        }
+                    </td>
                 </tr>
             }
         </tbody>
