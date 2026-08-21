@@ -54,23 +54,14 @@ public class PriceCheckJob
 
     private async Task CheckAndRecordPriceChangeAsync(TrackedProduct product)
     {
-
-        try { ScrapedProduct scrapedProduct = await _scraper.ScrapeProductAsync(product.Url); }
+        ScrapedProduct scrapedProduct;
+        try { scrapedProduct = await _scraper.ScrapeProductAsync(product.Url); }
 
         catch (TimeoutException ex)
         {
             _logger.LogWarning(
                 ex,
                 "Scraping timed out for {ProductName}. Skipping this product.",
-                product.ProductName);
-
-            return;
-        }
-        catch (PlaywrightException ex)
-        {
-            _logger.LogWarning(
-                ex,
-                "Playwright failed for {ProductName}. Skipping this product.",
                 product.ProductName);
 
             return;
