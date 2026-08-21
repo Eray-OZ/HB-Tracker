@@ -1,0 +1,14 @@
+@model HBTracker.Web.Models.AddProductViewModel
+
+<h1>Add Product</h1>
+
+<form asp-controller="Products" asp-action="Add" method="post">
+    <div>
+        <label asp-for="Url">Hepsiburada Product URL</label>
+        <input asp-for="Url" />
+    </div>
+
+    <span asp-validation-for="Url" class="text-danger"></span>
+
+    <button type="submit">Add Product</button>
+</form>

@@ -1,5 +1,6 @@
 using HBTracker.Data.Context;
 using Microsoft.EntityFrameworkCore;
+using HBTracker.Scraping.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ builder.Services.AddDbContext<HBTrackerDbContext>(options =>
 options.UseNpgsql(connectionString));
 
 
+builder.Services.AddScoped<HBScraper>();
 
 
 var app = builder.Build();
