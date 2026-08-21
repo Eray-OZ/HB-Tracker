@@ -4,6 +4,7 @@ using HBTracker.Scraping.Services;
 using HBTracker.Data.Context;
 using HBTracker.Data.Entities;
 using HBTracker.Scraping.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace HBTracker.Web.Controllers;
 
@@ -17,6 +18,15 @@ public class ProductsController : Controller
     {
         _scraper = scraper;
         _context = context;
+    }
+
+
+
+    [HttpGet]
+    public async Task<IActionResult> Index()
+    {
+        var trackedProducts = await _context.TrackedProducts.ToListAsync();
+        return View(trackedProducts);
     }
 
 
