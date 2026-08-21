@@ -50,7 +50,8 @@ public class HBScraper
             });
         var name = await productHeading.InnerTextAsync();
 
-        ILocator productPrice = page.Locator("div[data-test-id='default-price']");
+
+        ILocator productPrice = page.Locator("div[data-test-id='price']");
         await productPrice.WaitForAsync(new LocatorWaitForOptions { Timeout = 10000 });
         var priceString = await productPrice.InnerTextAsync();
         string cleanPrice = priceString.Replace("TL", "").Trim();

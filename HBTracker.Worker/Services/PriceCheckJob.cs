@@ -34,18 +34,11 @@ public class PriceCheckJob
 
         foreach (TrackedProduct product in products)
         {
-            _logger.LogInformation(
-                "Product: {ProductName} | Seller: {SellerName} | URL: {Url}",
-                product.ProductName,
-                product.SellerName ?? "Unknown",
-                product.Url);
+            await CheckAndRecordPriceDropAsync(product);
         }
 
 
-        var scrapedProduct = await _scraper.ScrapeProductAsync("https://www.hepsiburada.com/apple-iphone-15-128-gb-mavi-p-HBCV00004X9ZCK");
-        Console.WriteLine($"Name: {scrapedProduct.ProductName}");
-        Console.WriteLine($"Price: {scrapedProduct.Price}");
-        Console.WriteLine($"URL: {scrapedProduct.Url}");
+
     }
 
 
@@ -58,6 +51,29 @@ public class PriceCheckJob
         .AsNoTracking()
         .ToListAsync(cancellationToken);
         return products;
+    }
+
+
+    private async Task CheckAndRecordPriceDropAsync(TrackedProduct product)
+    {
+        ScrapedProduct scrapedProduct = await _scraper.ScrapeProductAsync(product.Url);
+
+        if (scrapedProduct.Price < product.CurrentPrice)
+        {
+            await _context.PriceHistories.AddAsync(
+                new PriceHistory
+                {
+                    TrackedProductId = product.Id,
+                    Price = scrapedProduct.Price,
+                    CheckedAt = DateTime.Now
+                }
+            );
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            _logger.LogInformation("{ProductName} price not dropped.", product.ProductName);
+        }
     }
 
 
